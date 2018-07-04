@@ -1,0 +1,33 @@
+
+// logger
+const log4js = require('log4js');
+const logger = log4js.getLogger('parserCSV.js');
+
+// read in the CSV data
+var { readFileSync } = require('fs');
+var parse = require('csv-parse/lib/sync');
+
+var moment = require('moment');
+var transfer = require('./transfer');
+
+class parserCSV {
+    getTransfers(file) {
+        var data = readFileSync("./"+file);
+        var transactions = parse(data, {columns: true});
+
+        // make a list of all the transactions
+        let transfers = [];
+        transactions.forEach(function(t){
+            if ( isNaN(+t.Amount) ) {
+                logger.error("transaction with invalid amount (" + t.Amount + ") - transaction ignored");
+            } else if ( !moment(t.Date, "DD/MM/YYYY").isValid() ) {
+                logger.error("transaction with invalid date (" + t.Date + ") - transaction ignored");
+            } else {
+                transfers.push(new transfer(moment(t.Date, "DD/MM/YYYY"), t.From, t.To, t.Narrative, +t.Amount));
+            }
+        });
+        return transfers;
+    }
+}
+
+module.exports = parserCSV;
