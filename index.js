@@ -20,10 +20,12 @@ var account = require("./account");
 var transfer = require("./transfer");
 var parserCSV = require("./parserCSV");
 var parserJSON = require("./parserJSON");
+var parserXML = require("./parseXML");
 
 // setup parsers
 let parCSV = new parserCSV();
 let parJSON = new parserJSON();
+let parXML = new parserXML();
 
 // set up accounts and transfers
 var accounts = new Map();
@@ -83,6 +85,7 @@ while(true) {
                     console.log("json file loaded");
                     break;
                 case "xml":
+                    transfers = parXML.getTransfers(file);
                     console.log("xml file loaded");
                     break;
                 default:
