@@ -12,12 +12,10 @@ log4js.configure({
 const logger = log4js.getLogger('index.js');
 
 // dependencies
-var moment = require('moment');
 var readline = require('readline-sync');
 
 // custom classes
 var account = require("./account");
-var transfer = require("./transfer");
 var parserCSV = require("./parserCSV");
 var parserJSON = require("./parserJSON");
 var parserXML = require("./parseXML");
@@ -27,11 +25,12 @@ let parCSV = new parserCSV();
 let parJSON = new parserJSON();
 let parXML = new parserXML();
 
-// set up accounts and transfers
+// set up empty accounts and transfers variables
 var accounts = new Map();
 var transfers = [];
 
-// returns list of accounts calculated from a list of transfers
+// accepts list of transactions
+// returns list of accounts
 function setupAccounts (transfers) {
     let a = new Map();
     // apply transfers to accounts (making new accounts in the process)
@@ -48,7 +47,6 @@ function setupAccounts (transfers) {
     return a;
 }
 
-
 // main
 while(true) {
     var input = readline.question("Enter command: ");
@@ -56,8 +54,14 @@ while(true) {
         break;
     }
     if (input !== null) {
+        // checks for 'List' command - then lists appropriately
+        // checks for 'Import' command - then imports appropriately
+        // prints error if
+        //      command is neither of above
+        //      account not found
+        //      file type not supported
         if (input.startsWith("List ")) {
-            var x = input.substring("List ".length);
+            var x = input.substring(5);
             if (x == "All") {
                 if (accounts !== {}) {
                     for (let name in accounts) {
@@ -72,30 +76,27 @@ while(true) {
                 console.log(accounts[x].statement.join("\n"));
             }
         } else if (input.startsWith("Import ")) {
-            var file = input.split(' ')[1];
-            // var filename = file.split('.')[0];
-            var fileformat = file.split('.')[1];
-            switch (fileformat) {
+            var file = input.split(' ').pop();
+            var format = file.split('.').pop();
+            switch (format) {
                 case "csv":
                     transfers = parCSV.getTransfers(file);
-                    console.log("csv file loaded");
                     break;
                 case "json":
                     transfers = parJSON.getTransfers(file);
-                    console.log("json file loaded");
                     break;
                 case "xml":
                     transfers = parXML.getTransfers(file);
-                    console.log("xml file loaded");
                     break;
                 default:
                     console.log("File format not supported");
+                    format = "no";
+                    break;
             }
+            console.log(format + " file loaded");
             accounts = setupAccounts(transfers);
         } else {
-            logger.error("Cheeeeese");
             console.log("instruction not understood");
         }
     }
 }
-

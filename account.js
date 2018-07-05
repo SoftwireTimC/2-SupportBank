@@ -3,23 +3,21 @@ const log4js = require('log4js');
 const logger = log4js.getLogger('account.js');
 
 class account {
+    // account initialised with 0 balance and an empty statement
     constructor(name) {
         this.name = name;
         this.balance = 0;
         this.statement = [];
     }
 
-    // apply a transaction to this account
+    // apply a transaction to account
+    //      update balance
+    //      add item to statement
     applyTransfer(t) {
-        if(t.from == this.name){
-            this.balance -= t.amount;
-            this.statement.push([t.date.format("DD/MM/YYYY"), -1*t.amount, t.to, t.ref].join("   "));
-        }else if(t.to == this.name){
-            this.balance += t.amount;
-            this.statement.push([t.date.format("DD/MM/YYYY"), t.amount, t.from, t.ref].join("   "));
-        }else{
-            // if transaction incorrectly submitted to this account
-        }
+        let date = t.date.format("DD/MM/YYYY");
+        let amount = (this.name == t.to) ? t.amount:-t.amount;
+        this.balance += amount;
+        this.statement.push([date, amount, t.from, t.ref].join("   "));
     }
 }
 
